@@ -18,11 +18,10 @@ namespace RenderEngine {
         ShaderProgram& operator=(const ShaderProgram&) = delete;
         ShaderProgram& operator=(ShaderProgram&& shaderProgram) noexcept;
         ShaderProgram(ShaderProgram&& shaderProgram) noexcept;
-        GLuint m_ID = 0;
 
     private:
         bool createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID);
-
+        GLuint m_ID = 0;
         bool m_isCompiled = false;
     };
 }
