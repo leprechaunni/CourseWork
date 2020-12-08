@@ -307,7 +307,7 @@ int main()
 		float timeValue = glfwGetTime();
 		float redValue = (sin(timeValue) / 1.5f) + 1.0f;
 		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		int vertexColorLocation = glGetUniformLocation(shaderProgram.m_ID, "ourColor");
 		glUniform4f(vertexColorLocation, redValue, greenValue, 0.0f, 1.0f);
 
 		glBindVertexArray(VAO[0]);
