@@ -1,69 +1,51 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include "ShaderProgram.h"
 
+#include <iostream>
 using namespace std;
 
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec3 color;\n"
-"out vec4 vertexColor_yel;\n"
-"out vec4 vertexColor_gr;\n"
-"out vec4 vertexColor_or;\n"
-"out vec3 ourColor_1;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-"	ourColor_1 = color;\n"
-"	vertexColor_yel = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
-"	vertexColor_gr = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
-"	vertexColor_or = vec4(1.0f, 0.5f, 0.0f, 1.0f);\n"
 "}\0";
 const char* fragmentShaderSource_yellow = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"uniform vec4 ourColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = ourColor;\n"
+"   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
 "}\n\0";
 const char* fragmentShaderSource_green = "#version 330 core\n"
-"in vec4 vertexColor_gr;\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vertexColor_gr;\n"
+"   FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 "}\n\0";
 const char* fragmentShaderSource_orange = "#version 330 core\n"
-"in vec3 ourColor_1;\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(ourColor_1, 1.0);\n"
+"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 "}\n\0";
-
 
 GLfloat vertices1[] = {
 	-0.5f, 0.5f, 0.0f,
-	 0.0f, 0.0f, 0.0f,
+	0.0f, 0.0f, 0.0f,
 	-0.5f, -0.5f, 0.0f
 };
 
 GLfloat vertices2[] = {
-
-	1.0f,  1.0f,  0.0f,
-	1.0f, -1.0f,  0.0f,
-	0.6f,  1.0f,  0.0f,
-	0.6f, -1.0f,  0.0f
-
+	1.0f, 1.0f, 0.0f,
+	0.5f, 0.0f, 0.0f,
+	1.0f, -1.0f, 0.0f
 };
 
 GLfloat vertices_kv[] = {
-			//koordinates	//colors
-	0.5f,  0.25f, 0.0f,		1.0f, 0.0f, 0.0f, //verh_r
-	0.5f, -0.25f, 0.0f,		0.0f, 1.0f, 0.0f, //niz_r
-	0.0f, -0.25f, 0.0f,		0.0f, 0.0f, 1.0f,//niz_l
-	0.0f,  0.25f, 0.0f,		0.0f, 1.0f, 0.0f//verh_l
+	0.5f,  0.25f, 0.0f,  //verh_r
+	0.5f, -0.25f, 0.0f,  //niz_r
+	0.0f, -0.25f, 0.0f,  //niz_l
+	0.f,  0.25f, 0.0f   //verh_l
 };
 
 GLuint indices[] = {
@@ -150,17 +132,27 @@ int main()
 	//how we want to display the data and coordinates with respect to the window
 	//glViewport(0, 0, 800, 600);
 
-	string vertexShader(vertexShaderSource);
-	string fragmentShader(fragmentShaderSource_yellow);
-	RenderEngine::ShaderProgram shaderProgram(vertexShader, fragmentShader);
-	if (!shaderProgram.isCompiled())
-	{
-		cerr << "can't create shader programm" << endl;
-		return -1;
-	}
+	GLuint vertexShader; //the shader object
+	vertexShader = glCreateShader(GL_VERTEX_SHADER); //create, (type)
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); 
+	glCompileShader(vertexShader);
+
+	GLuint fragmentShader_yel; //the shader object
+	fragmentShader_yel = glCreateShader(GL_FRAGMENT_SHADER); //create, (type)
+	glShaderSource(fragmentShader_yel, 1, &fragmentShaderSource_yellow, NULL);
+	glCompileShader(fragmentShader_yel);
+
+	GLuint shaderProgram1;
+	shaderProgram1 = glCreateProgram(); 
+	glAttachShader(shaderProgram1, vertexShader); //put vertSh in shProg
+	glAttachShader(shaderProgram1, fragmentShader_yel); //put fragSh in shProg
+	glLinkProgram(shaderProgram1); //linking
+
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader_yel);
 
 
-	/*GLuint fragmentShader_gr; //the shader object
+	GLuint fragmentShader_gr; //the shader object
 	fragmentShader_gr = glCreateShader(GL_FRAGMENT_SHADER); //create, (type)
 	glShaderSource(fragmentShader_gr, 1, &fragmentShaderSource_green, NULL);
 	glCompileShader(fragmentShader_gr);
@@ -188,11 +180,8 @@ int main()
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader_or);
-	*/
 
-
-
-
+	
 	
 	GLuint VBO[3], VAO[3], EBO;
 	glGenVertexArrays(3, VAO);
@@ -216,10 +205,8 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_kv), vertices_kv, GL_STATIC_DRAW); //put data in buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); //type
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -285,8 +272,6 @@ int main()
 	glBindVertexArray(0);
 	*/
 
-	//Shaders ourShader("C:/CourseWork/vs_shaders.txt", "C:/CourseWork/fs_shaders.txt")
-
 	//We don't want the application to draw a single image 
 	//and then immediately quit and close the window
 	//so we have to create the render loop, that keeps on 
@@ -303,29 +288,21 @@ int main()
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); //karkas regim
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		shaderProgram.use();
-		float timeValue = glfwGetTime();
-		float redValue = (sin(timeValue) / 1.5f) + 1.0f;
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-		glUniform4f(vertexColorLocation, redValue, greenValue, 0.0f, 1.0f);
-
+		glUseProgram(shaderProgram1);
 		glBindVertexArray(VAO[0]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
 		
-
-		/*glUseProgram(shaderProgram2);
+		glUseProgram(shaderProgram2);
 		glBindVertexArray(VAO[1]);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0); 
-
 
 		glUseProgram(shaderProgram3);
 		glBindVertexArray(VAO[2]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);*/
+		glBindVertexArray(0);
 		
 
 		glfwSwapBuffers(window);
@@ -340,9 +317,9 @@ int main()
 	glDeleteBuffers(3, VAO);
 	glDeleteBuffers(3, VBO);
 	glDeleteBuffers(1, &EBO);
-	//~shaderProgram();
-	//glDeleteProgram(shaderProgram2);
-	//glDeleteProgram(shaderProgram3);
+	glDeleteProgram(shaderProgram1);
+	glDeleteProgram(shaderProgram2);
+	glDeleteProgram(shaderProgram3);
 	glfwTerminate();
 	return 0;
 	
