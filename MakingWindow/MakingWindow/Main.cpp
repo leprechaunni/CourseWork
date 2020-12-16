@@ -1,56 +1,24 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <gl/GL.h>
+#include <glm/glm/vec2.hpp>
+#include <glm/glm/mat4x4.hpp>
+#include <glm/glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
+
 #include "ShaderProgram.h"
 #include "Manager.h"
+#include "stb_image.h"
+#include "Texture2D.h"
+
 
 using namespace std;
 
-/*
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec3 color;\n"
-"out vec4 vertexColor_yel;\n"
-"out vec4 vertexColor_gr;\n"
-"out vec4 vertexColor_or;\n"
-"out vec3 ourColor_1;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
-"	ourColor_1 = color;\n"
-"	vertexColor_yel = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
-"	vertexColor_gr = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
-"	vertexColor_or = vec4(1.0f, 0.5f, 0.0f, 1.0f);\n"
-"}\0";
-const char* fragmentShaderSource_yellow = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"uniform vec4 ourColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = ourColor;\n"
-"}\n\0";
-const char* fragmentShaderSource_green = "#version 330 core\n"
-"in vec4 vertexColor_gr;\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vertexColor_gr;\n"
-"}\n\0";
-const char* fragmentShaderSource_orange = "#version 330 core\n"
-"in vec3 ourColor_1;\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(ourColor_1, 1.0f);\n"
-"}\n\0";
-*/
-
-
-GLfloat vertices1[] = {
-	-0.5f, 0.5f, 0.0f,
-	 0.0f, 0.0f, 0.0f,
-	-0.5f, -0.5f, 0.0f
+GLfloat triangle[] = {
+	 0.5f,  0.5f, 0.0f,
+	 0.2f, 0.3f, 0.0f,
+	0.2f, 0.8f, 0.0f
 };
 
 GLfloat vertices2[] = {
@@ -59,6 +27,14 @@ GLfloat vertices2[] = {
 	1.0f, -1.0f,  0.0f,
 	0.6f,  1.0f,  0.0f,
 	0.6f, -1.0f,  0.0f
+
+};
+GLfloat texture[] = {
+
+	1.0f,  1.0f,
+	1.0f,  0.0f,
+	0.0f,  1.0f,
+	0.0f,  0.0f
 
 };
 
@@ -91,6 +67,8 @@ GLfloat polygon[] = {
 	0.0f, 0.4f, 0.0f,
 	0.4f, 0.2f, 0.0f
 };
+
+
 
 //While the size of a window is measured in screen coordinates, OpenGL works 
 //with pixels. The size you pass into glViewport, for example, 
@@ -194,18 +172,21 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	auto tex = manager.loadTexture("DefaultTexture", "resource/wall.jpg");
+
+	
+
+
+
 	{
-
-
-
-		GLuint VBO[6], VAO[6], EBO;
-		glGenVertexArrays(6, VAO);
-		glGenBuffers(6, VBO); //create
+		GLuint VBO[7], VAO[7], EBO;
+		glGenVertexArrays(7, VAO);
+		glGenBuffers(7, VBO); //create
 		glGenBuffers(1, &EBO);
 
 		glBindVertexArray(VAO[0]);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[0]); //type
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW); //put data in buffer
+		glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW); //put data in buffer
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
@@ -214,6 +195,11 @@ int main(int argc, char** argv)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW); //put data in buffer
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO[6]); //type
+		glBufferData(GL_ARRAY_BUFFER, sizeof(texture), texture, GL_STATIC_DRAW); //put data in buffer
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+
 
 		glBindVertexArray(VAO[2]);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO[2]); //type
@@ -247,10 +233,6 @@ int main(int argc, char** argv)
 		glBindVertexArray(0);
 
 
-
-
-
-
 	//We don't want the application to draw a single image 
 	//and then immediately quit and close the window
 	//so we have to create the render loop, that keeps on 
@@ -279,38 +261,47 @@ int main(int argc, char** argv)
 			glBindVertexArray(VAO[0]);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 			glBindVertexArray(0);
-		
 
 			pGreenShaderProgram->use();
+			pGreenShaderProgram->setInt("tex", 0);
 			glBindVertexArray(VAO[1]);
+			tex->bind();
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 
-		
+
 			pOrangeShaderProgram->use();
 			glBindVertexArray(VAO[2]);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
-		/*
-		shaderProgram_gr.use();
-		glBindVertexArray(VAO[3]);
-		glDrawArrays(GL_POINTS, 0, 1);
-		glBindVertexArray(0);
 
-		//shaderProgram_or.use();
-		glBindVertexArray(VAO[4]);
-		//glLineWidth(5);
-		glDrawArrays(GL_LINES, 0, 2);
-		glBindVertexArray(0);
+			/*pOrangeShaderProgram->use();
 
-		//shaderProgram_or.use();
-		glBindVertexArray(VAO[5]);
-		glDrawArrays(GL_LINE_LOOP, 0, 5);
-		glBindVertexArray(0);
-		*/
+			glm::mat4 modelMatrix_1 = glm::mat4(1.f); //единичная матрица
+			//using glm add to it moving
+			modelMatrix_1 = glm::translate(modelMatrix_1, glm::vec3(0.5f*200.f, 200.f, 0.f));//object->world space
+			//опускаем view matrix тк камера неподвижна и матрица будет единичной с центром (0,0,0)
+			modelMatrix_1 = glm::rotate(modelMatrix_1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.f));
+			
+			glm::mat4 modelMatrix_2 = glm::mat4(1.f);
+			modelMatrix_2 = glm::translate(modelMatrix_2, glm::vec3(400.f, 300.f, 0.f));
+			modelMatrix_2 = glm::rotate(modelMatrix_2, (float)tan(glfwGetTime()), glm::vec3(0.f, 0.f, 1.f));
+			modelMatrix_2 = glm::scale(modelMatrix_2, glm::vec3((float)sin(glfwGetTime()), (float)sin(glfwGetTime()), 1.f));
 
+			glm::mat4 projectionMatrix = glm::ortho(0.f, 800.f, 0.f, 600.f, -100.f, 100.f);//clip space
+			//передаем в вертексный шейдер и перемножаем с вектором координат и подаем на выход шейдера
+			pOrangeShaderProgram->setMatrix4("projectionMat", projectionMatrix);
+						
+			glBindVertexArray(VAO[0]);
+			pOrangeShaderProgram->setMatrix4("modelMat", modelMatrix_1);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+			pOrangeShaderProgram->setMatrix4("modelMat", modelMatrix_2);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+			glBindVertexArray(0);*/
+			
 
+			
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
@@ -322,8 +313,8 @@ int main(int argc, char** argv)
 
 
 
-		glDeleteBuffers(6, VAO);
-		glDeleteBuffers(6, VBO);
+		glDeleteBuffers(7, VAO);
+		glDeleteBuffers(7, VBO);
 		glDeleteBuffers(1, &EBO);
 	}
 	glfwTerminate();
