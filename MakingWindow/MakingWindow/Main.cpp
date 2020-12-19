@@ -63,6 +63,16 @@ GLfloat texture[] = {
 
 };
 
+GLfloat circle_an[];
+	int steps = 10;
+	float angle = 3.1415926 * 2.f / steps;
+	float xPos = 0;
+	float yPos = 0;
+	float radius = 1.f;
+	
+
+
+
 float m_rotate = 0;
 float m_left_right = 0;
 float m_up_down = 0;
@@ -164,6 +174,22 @@ void processInput(GLFWwindow* window)
 
 int main(int argc, char** argv)
 {
+	float prevX = xPos;
+	float prevY = yPos - radius;
+	for (int i = 0; i <= steps; i++)
+	{
+		float newX = radius * sin(angle * i);
+		float newY = -radius * cos(angle * i);
+		circle_an[] = {
+			0.f, 0.f, 0.f,
+			prevX, prevY, 0.f,
+			newX, newY, 0.f
+		};
+		prevX = newX;
+		prevY = newY;
+	}
+
+
 	glfwInit(); //initializes the GLFW library
 	//sets the minimum required OpGL vers
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //major
@@ -350,11 +376,18 @@ int main(int argc, char** argv)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
+		//circle
+		glBindVertexArray(VAO[6]);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO[7]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(circle_an), circle_an, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		
 		
-
+		
 
 
 	//We don't want the application to draw a single image 
@@ -435,6 +468,9 @@ int main(int argc, char** argv)
 			romb = glm::rotate(romb, m_rotate, glm::vec3(0.f, 0.f, 1.f));
 			romb = glm::scale(romb, glm::vec3(m_sizex, m_sizey, 1.f));
 			
+			glm::mat4 circle = glm::mat4(1.f);
+			circle = glm::translate(circle, glm::vec3(m_left_right, m_up_down, 0.f));
+			circle = glm::rotate(circle, m_rotate, glm::vec3(0.f, 0.f, 1.f));
 
 			
 
@@ -474,6 +510,12 @@ int main(int argc, char** argv)
 			{
 				glBindVertexArray(VAO[5]);
 				pPurpleShaderProgram_an->setMatrix4("modelMat", polygon);
+				glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
+			}
+			if (m_change == 7)
+			{
+				glBindVertexArray(VAO[6]);
+				pPurpleShaderProgram_an->setMatrix4("modelMat", circle);
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
 			}
 			
