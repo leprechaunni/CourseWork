@@ -63,15 +63,6 @@ GLfloat texture[] = {
 
 };
 
-GLfloat circle_an[];
-	int steps = 10;
-	float angle = 3.1415926 * 2.f / steps;
-	float xPos = 0;
-	float yPos = 0;
-	float radius = 1.f;
-	
-
-
 
 float m_rotate = 0;
 float m_left_right = 0;
@@ -81,20 +72,12 @@ float m_sizey = 1;
 int m_change = 0;
 int m_color;
 
-//While the size of a window is measured in screen coordinates, OpenGL works 
-//with pixels. The size you pass into glViewport, for example, 
-//should be in pixels
-//The callback function receives the new size of the framebuffer when it is 
-//resized, which can for example be used to update the OpenGL viewport
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
-//Whenever the window changes in size, GLFW calls this function and fills in 
-//the proper arguments for you to process
 
-//process all input: query GLFW whether relevant keys are pressed/released 
-//this frame and react accordingly
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -174,31 +157,13 @@ void processInput(GLFWwindow* window)
 
 int main(int argc, char** argv)
 {
-	float prevX = xPos;
-	float prevY = yPos - radius;
-	for (int i = 0; i <= steps; i++)
-	{
-		float newX = radius * sin(angle * i);
-		float newY = -radius * cos(angle * i);
-		circle_an[] = {
-			0.f, 0.f, 0.f,
-			prevX, prevY, 0.f,
-			newX, newY, 0.f
-		};
-		prevX = newX;
-		prevY = newY;
-	}
+	
 
 
 	glfwInit(); //initializes the GLFW library
 	//sets the minimum required OpGL vers
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //major
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); //minor
-	//GLFW_OPENGL_PROFILE указывает, д какого профиля OpGL следует создать контекст
-	//core profile - основной профиль
-	//сообщаем, что хотим явно использовать основной профиль - мы получим доступ
-	//к меньшему подмножеству функций OpGL без обратной совместимости ф-й
-	//к-е нам больше не нужны 
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "My Title", NULL, NULL);
@@ -207,36 +172,22 @@ int main(int argc, char** argv)
 	if (window == NULL) 
 	{
 		cout << "Failed to create GLFW window" << endl;
-		glfwTerminate(); //Эта функция уничтожает все оставшиеся окна и курсоры, 
-		//восстанавливает любые измененные гамма-рампы и освобождает любые другие 
-		//выделенные ресурсы
+		glfwTerminate(); 
 		
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
 	
-	//We do have to tell GLFW we want to call this function on every 
-	//window resize by registering it
+	
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	//When the window is first displayed framebuffer_size_callback gets called 
-	//as well with the resulting window dimensions.
 	
-	//GLAD управляет указателями функций для OpenGL, поэтому мы хотим 
-	//инициализировать GLAD перед вызовом любой функции OpenGL
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		cout << "Failed to initialize GLAD" << endl;
 		return -1;
 	}
-	//Мы передаем GLAD функцию для загрузки адреса указателей функций OpenGL, 
-	//который является специфичным для ОС. GLFW дает нам glfwGetProcAddress, 
-	//который определяет правильную функцию, основанную на том, 
-	//для какой ОС мы компилируем.
-
-	//We have to tell OpenGL the size of the rendering window so OpenGL knows 
-	//how we want to display the data and coordinates with respect to the window
-	//glViewport(0, 0, 800, 600);
+	
 
 	Manager manager(argv[0]);
 	
@@ -376,25 +327,12 @@ int main(int argc, char** argv)
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(0);
 
-		//circle
-		glBindVertexArray(VAO[6]);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO[7]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(circle_an), circle_an, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-		glEnableVertexAttribArray(0);
+		
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		
-		
-		
 
-
-	//We don't want the application to draw a single image 
-	//and then immediately quit and close the window
-	//so we have to create the render loop, that keeps on 
-	//running until we tell GLFW to stop
-	//This function returns the value of the close flag of the specified window.
 		while (!glfwWindowShouldClose(window))
 		{
 			processInput(window);
@@ -468,11 +406,7 @@ int main(int argc, char** argv)
 			romb = glm::rotate(romb, m_rotate, glm::vec3(0.f, 0.f, 1.f));
 			romb = glm::scale(romb, glm::vec3(m_sizex, m_sizey, 1.f));
 			
-			glm::mat4 circle = glm::mat4(1.f);
-			circle = glm::translate(circle, glm::vec3(m_left_right, m_up_down, 0.f));
-			circle = glm::rotate(circle, m_rotate, glm::vec3(0.f, 0.f, 1.f));
-
-			
+						
 
 			pPurpleShaderProgram_an->setMatrix4("projectionMat", projectionMatrix);
 
@@ -512,12 +446,6 @@ int main(int argc, char** argv)
 				pPurpleShaderProgram_an->setMatrix4("modelMat", polygon);
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
 			}
-			if (m_change == 7)
-			{
-				glBindVertexArray(VAO[6]);
-				pPurpleShaderProgram_an->setMatrix4("modelMat", circle);
-				glDrawArrays(GL_TRIANGLE_FAN, 0, 5);
-			}
 			
 
 			glBindVertexArray(0);
@@ -525,10 +453,6 @@ int main(int argc, char** argv)
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		}
-	//glfwSwapBuffers will swap the color buffer that is used to render to during 
-	//this render iteration and show it as output to the screen.
-	//glfwPollEvents function checks if any events are triggered, updates the 
-	//window state, and calls the corresponding functions
 
 		glDeleteBuffers(7, VAO);
 		glDeleteBuffers(8, VBO);
