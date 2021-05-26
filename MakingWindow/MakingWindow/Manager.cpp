@@ -8,7 +8,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
+//#define STBI_ONLY_PNG
 #include "stb_image.h"
 
 Manager::Manager(const std::string& executablePath)
@@ -17,6 +17,7 @@ Manager::Manager(const std::string& executablePath)
     m_path = executablePath.substr(0, found);
 }
 
+//чтение файла из строки
 std::string Manager::getFileString(const std::string& relativeFilePath) const
 {
     std::ifstream f;
@@ -32,6 +33,7 @@ std::string Manager::getFileString(const std::string& relativeFilePath) const
     return buffer.str();
 }
 
+//загрузка шейдера
 std::shared_ptr<RenderEngine::ShaderProgram> Manager::loadShaders(const std::string& shaderName, const std::string& vertexPath, const std::string& fragmentPath)
 {
     std::string vertexString = getFileString(vertexPath);
@@ -61,7 +63,7 @@ std::shared_ptr<RenderEngine::ShaderProgram> Manager::loadShaders(const std::str
     return nullptr;
 }
 
-
+//получаем шейдерную программу, чтобы позже к ней можно было обратиться
 std::shared_ptr<RenderEngine::ShaderProgram> Manager::getShaderProgram(const std::string& shaderName)
 {
     ShaderProgramsMap::const_iterator it = m_shaderPrograms.find(shaderName);

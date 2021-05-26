@@ -14,8 +14,11 @@ namespace RenderEngine {
         void setInt(const std::string& name, const GLint value);
         void setMatrix4(const std::string& name, const glm::mat4& matrix);
 
-        ShaderProgram() = delete;
+        //запрещаем конструктор без параметров
+        ShaderProgram() = delete; 
+        //запрещаем конструирование шейд.пр с другой шейд.пр
         ShaderProgram(const ShaderProgram&) = delete;
+        //запрещаем оператор =, чтобы не приравнивать 1 шейдер к др
         ShaderProgram& operator=(const ShaderProgram&) = delete;
         ShaderProgram& operator=(ShaderProgram&& shaderProgram) noexcept;
         ShaderProgram(ShaderProgram&& shaderProgram) noexcept;

@@ -7,6 +7,7 @@
 namespace RenderEngine {
     ShaderProgram::ShaderProgram(const std::string& vertexShader, const std::string& fragmentShader)
     {
+        //создаем объект шейдера и проверяем на наличие ошибок
         GLuint vertexShaderID;
         if (!createShader(vertexShader, GL_VERTEX_SHADER, vertexShaderID))
         {
@@ -22,11 +23,15 @@ namespace RenderEngine {
             return;
         }
 
+        //создаем сам шейдер
         m_ID = glCreateProgram();
+        //прикрепляем ранее скомпилированные шейдеры к объекту программы
         glAttachShader(m_ID, vertexShaderID);
         glAttachShader(m_ID, fragmentShaderID);
+        //связываем их
         glLinkProgram(m_ID);
 
+        //проверка на наличие ошибок в шейдерной программе
         GLint success;
         glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
         if (!success)
@@ -40,6 +45,7 @@ namespace RenderEngine {
             m_isCompiled = true;
         }
 
+        //удаление шейдерных объектов, так как они связаны с программным объектом и больше не нужны
         glDeleteShader(vertexShaderID);
         glDeleteShader(fragmentShaderID);
     }
@@ -47,11 +53,14 @@ namespace RenderEngine {
 
     bool ShaderProgram::createShader(const std::string& source, const GLenum shaderType, GLuint& shaderID)
     {
+        //создание шейдера
         shaderID = glCreateShader(shaderType);
         const char* code = source.c_str();
+        //прикрепляем исходный код шейдера к объекту шейдера и компилируем его
         glShaderSource(shaderID, 1, &code, nullptr);
         glCompileShader(shaderID);
 
+        //проверка на успех (верно создан ли шейдер)
         GLint success;
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
         if (!success)
@@ -69,6 +78,7 @@ namespace RenderEngine {
         glDeleteProgram(m_ID);
     }
 
+    //использование шейдера
     void ShaderProgram::use() const
     {
         glUseProgram(m_ID);
